@@ -1,0 +1,136 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Poppins", sans-serif;
+}
+html, body {
+    height: 100%;
+    margin: 0;
+    overflow-x: hidden;
+}
+
+
+
+nav {
+    position: sticky;
+    top: 0;
+    width: 100%;
+}
+
+body {
+    background: linear-gradient(to right, #e0f7fa, #80deea);
+    display: flex;
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+     /* Full viewport height */
+}
+
+h3{
+    color: white;
+}
+nav {
+    width: 100%;
+    position: absolute;
+    top: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center; /* Center the navigation */
+    background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent nav */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+nav ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+}
+
+nav ul li {
+    margin-right: 20px;
+}
+
+nav ul li a {
+    text-decoration: none;
+    color: #004d40;
+    font-weight: bold;
+    transition: color 0.3s ease;
+}
+
+nav ul li a:hover {
+    color: #00796b;
+}
+
+.homepage-container {
+    min-height: 100vh; /* Ensures it takes at least the full height of the viewport */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 10px;
+    width: 100%;
+    max-width: 700px;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    animation: fadeIn 1s ease-in-out;
+    margin-top: 100px; /* Space between nav and container */
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.title {
+    font-size: 2.5rem;
+    color: #00796b;
+    margin-bottom: 1rem;
+    font-weight: bold;
+}
+
+.subtitle {
+    font-size: 1.3rem;
+    color: #004d40;
+    margin-bottom: 2rem;
+}
+
+.ride-options {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem; /* Add space between options */
+    margin-top: 2rem;
+}
+
+.ride-option {
+    background: #00796b;
+    color: white;
+    padding: 1rem;
+    border-radius: 8px;
+    text-align: center;
+    width: 150px;
+    cursor: pointer;
+    transition: transform 0.3s ease, background 0.3s ease;
+}
+
+.ride-option:hover {
+    background: #004d40;
+    transform: translateY(-10px);
+}
+
+.ride-option i {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    display: block; /* Ensures the icon is centered above the text */
+}
+
+/* Animation for hover effect on the ride options */
+@keyframes optionHover {
+    from {
+        transform: scale(1);
+    }
+    to {
+        transform: scale(1.05);
+    }
+}

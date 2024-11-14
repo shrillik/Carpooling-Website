@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pickup & Drop Location Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" 
+     crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" 
+    crossorigin=""></script>
+    <style>
+        #map { height: 500px; }
+        .controls { margin-bottom: 20px; }
+        input {
+            width: 300px;
+            padding: 8px;
+            margin-top: 10px;
+        }
+        button {
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .current-location-btn {
+            margin-left: 10px;
+            padding: 8px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .current-location-btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Set Pickup and Drop Location</h1>
+    <div class="controls">
+        <label for="pickup">Pickup Location:</label>
+        <input type="text" id="pickup" placeholder="Enter pickup location" list="pickupSuggestions" oninput="fetchLocationSuggestions(this.value, 'pickupSuggestions')">
+        <datalist id="pickupSuggestions"></datalist>
+        <button class="current-location-btn" onclick="setCurrentLocation()">Use Current Location</button>
+        <br>
+        <label for="drop">Drop Location:</label>
+        <input type="text" id="drop" placeholder="Enter drop location" list="dropSuggestions" oninput="fetchLocationSuggestions(this.value, 'dropSuggestions')">
+        <datalist id="dropSuggestions"></datalist>
+        <br><br>
+        <button onclick="setLocations()">Set Locations</button>
+    </div>
+
+    <div id="map"></div>
+
+    <script>
+        // Initialize the map, center on India and restrict bounds
+        var map = L.map('map').setView([20.5937, 78.9629], 5);
+
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(map);
+
+        // Restrict the map to India bounds
+        const indiaBounds = [[6.5546079, 68.1113787], [35.6745457, 97.395561]];
+        map.setMaxBounds(indiaBounds);
+        map.on('drag', function() {
+            map.panInsideBounds(indiaBounds, { animate: false });
+        });
+
+        let pickupMarker, dropMarker, routeLine;
+
+        // Function to set pickup and drop locations based on user input
+        function setLocations() {
+            const pickupInput = document.getElementById('pickup').value;
+            const dropInput = document.getElementById('drop').value;
+
+            if (pickupInput && dropInput) {
+                getCoordinates(pickupInput, (pickupCoords) => {
+                    getCoordinates(dropInput, (dropCoords) => {
+                        if (pickupCoords && dropCoords) {
+                            if (pickupMarker) map.removeLayer(pickupMarker);
+                            if (dropMarker) map.removeLayer(dropMarker);
+                            if (routeLine) map.removeLayer(routeLine);
+
+                            pickupMarker = L.marker(pickupCoords).addTo(map).bindPopup("Pickup Location").openPopup();
+                            dropMarker = L.marker(dropCoords).addTo(map).bindPopup("Drop Location").openPopup();
+
+                            const bounds = L.latLngBounds([pickupCoords, dropCoords]);
+                            map.fitBounds(bounds);
+
+                            routeLine = L.polyline([pickupCoords, dropCoords], {color: 'blue'}).addTo(map);
+                        } else {
+                            alert("Could not fetch coordinates for the locations.");
+                        }
+                    });
+                });
+            } else {
+                alert("Please enter valid pickup and drop locations");
+            }
+        }
+
+        // Get the current location of the user and set it as the pickup location
+        function setCurrentLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((position) => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    document.getElementById('pickup').value = ${lat}, ${lon};
+                    
+                    // Automatically set the pickup marker on the map using the current location
+                    if (pickupMarker) map.removeLayer(pickupMarker);
+                    pickupMarker = L.marker([lat, lon]).addTo(map).bindPopup("Current Pickup Location").openPopup();
+                    map.setView([lat, lon], 14); // Zoom in on current location
+                }, () => {
+                    alert("Unable to retrieve your location.");
+                });
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+        }
+
+        // Fetch location suggestions from Nominatim API
+        function fetchLocationSuggestions(query, datalistId) {
+            const url = https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=IN&limit=5;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    const datalist = document.getElementById(datalistId);
+                    datalist.innerHTML = ""; 
+
+                    if (data && data.length > 0) {
+                        data.forEach(location => {
+                            const option = document.createElement('option');
+                            option.value = location.display_name; 
+                            datalist.appendChild(option);
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching location suggestions:', error);
+                });
+        }
+
+        // Get coordinates from Nominatim API
+        function getCoordinates(location, callback) {
+            const url = https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}&countrycodes=IN;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.length > 0) {
+                        const lat = parseFloat(data[0].lat);
+                        const lon = parseFloat(data[0].lon);
+                        callback([lat, lon]);
+                    } else {
+                        callback(null);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching location data:', error);
+                    callback(null);
+                });
+        }
+    </script>
+</body>
+</html>
