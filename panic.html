@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panic Button Example</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .panic-button {
+            padding: 20px;
+            background-color: #dc3545; /* Red color for panic */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .panic-button:hover {
+            background-color: #c82333; /* Darker red on hover */
+        }
+    </style>
+</head>
+<body>
+    <button class="panic-button" id="panic-button">Panic!</button>
+
+    <script>
+        document.getElementById('panic-button').addEventListener('click', () => {
+            const emergencyContactNumber = 'YOUR_EMERGENCY_CONTACT_NUMBER'; // Replace with actual number
+            const message = 'Emergency! I need help.';
+
+            // Check for geolocation
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((position) => {
+                    const { latitude, longitude } = position.coords;
+                    const locationMessage = `My location: https://www.google.com/maps?q=${latitude},${longitude}`;
+
+                    // Send the panic message
+                    sendPanicMessage(emergencyContactNumber, message + '\n' + locationMessage);
+                }, () => {
+                    alert('Unable to retrieve your location.');
+                });
+            } else {
+                alert('Geolocation is not supported by this browser.');
+            }
+        });
+
+        function sendPanicMessage(contactNumber, message) {
+            // Replace with your SMS API or email service
+            fetch('/send-sms', { // Example endpoint to handle SMS sending
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    to: contactNumber,
+                    message: message,
+                }),
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('Panic message sent successfully.');
+                } else {
+                    alert('Failed to send panic message.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error sending message.');
+            });
+        }
+    </script>
+</body>
+</html>
